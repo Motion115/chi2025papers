@@ -1,0 +1,7 @@
+.ipynb_checkpoints/*
+wandb/
+notebooks/.ipynb_checkpoints/*
+data/
+scibert-weights/
+**__pycache__
+dynamic_document_embedding/
