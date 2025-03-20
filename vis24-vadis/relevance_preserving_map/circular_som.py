@@ -477,7 +477,10 @@ def generate_rr_projection(data, relevance, metadata, num_of_epochs=1, w_s=0.2, 
     kmeans = KMeans(n_clusters=8, random_state=0, n_init="auto").fit(embeddings)
     df["category_num"] = kmeans.labels_
 
-    return som, df
+    # df to list again
+    df_list = df.to_dict('records')
+
+    return som, df, df_list
 
 
 def plot_som_results(som, data, labels, relevance, sort=False):

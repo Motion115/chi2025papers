@@ -1,9 +1,10 @@
 
 import json
+from sklearn.cluster import KMeans
 import torch
 from transformers import AutoTokenizer, AutoModel, BertTokenizerFast
 from model.pam import DynamicDocumentEmbeddingModel
-from relevance_preserving_map.circular_som import CircularSOM, get_grid_position_som, plot_som_results
+from relevance_preserving_map.circular_som import CircularSOM, generate_rr_projection, get_grid_position_som, plot_som_results
 import numpy as np
 from tqdm import tqdm
 
@@ -33,9 +34,9 @@ if __name__ == '__main__':
         data = json.load(f)
 
     # Extract documents
-    documents = [d['abstract'] for d in data]
+    documents = [d['content'] for d in data][:64]
     query = [
-        'visualization',
+        'Make it Visible',
     ]
 
     # Batch size for documents
@@ -101,8 +102,8 @@ if __name__ == '__main__':
             data=doc_embed,
             relevance_score=relevance,
             num_iteration=1000,  # Adjust as needed
-            w_s=0.9,          # Weight for similarity
-            w_r=0.1,          # Weight for relevance
+            w_s=0.8,          # Weight for similarity
+            w_r=0.2,          # Weight for relevance
             verbose=True,
             report_error=True,
             use_sorted=True
@@ -116,5 +117,18 @@ if __name__ == '__main__':
         # save as json
         with open(f"./data/layout/{query[i]}.json", "w") as f:
             json.dump(data_grid_positions, f, indent=2)
+
+        # # kmeans with elbow
+        # kmeans = KMeans(n_clusters=7, random_state=42).fit(doc_embed)
+        # # pred each input's label
+        # labels = kmeans.predict(doc_embed)
+        # # save id with labels
+        # with open(f"./data/layout/{query[i]}_kmeans.json", "w") as f:
+        #     json.dump(labels.tolist(), f, indent=2)
+
+        som, df, df_list = generate_rr_projection(doc_embed, relevance, data)
+        # save as json
+        with open(f"./data/rr.json", "w") as f:
+            json.dump(df_list, f, indent=2)
 
 

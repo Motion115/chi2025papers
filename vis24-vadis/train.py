@@ -73,16 +73,14 @@ if __name__ == '__main__':
     # parser = HfArgumentParser(TrainingArguments)
     # args = parser.parse_args_into_dataclasses()[0]
 
-    batch_size = 8
-    num_epochs = 5
+    batch_size = 12
+    num_epochs = 15
 
     pretrained_model_path = './scibert-weights'
 
     tokenizer = AutoTokenizer.from_pretrained(
         pretrained_model_path, local_files_only=True)
-    
-    print(tokenizer)
-    exit()
+
 
     datasets = []
     with open('./data/finetune.json', 'r', encoding='utf-8') as f:
