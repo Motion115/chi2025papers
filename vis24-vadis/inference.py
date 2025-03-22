@@ -34,9 +34,9 @@ if __name__ == '__main__':
         data = json.load(f)
 
     # Extract documents
-    documents = [d['content'] for d in data][:64]
+    documents = [d['content'] for d in data]
     query = [
-        'Make it Visible',
+        "GistVis: Automatic Generation of Word-scale Visualizations from Data-rich Documents\nData-rich documents are ubiquitous in various applications, yet they often rely solely on textual descriptions to convey data insights. Prior research primarily focused on providing visualization-centric augmentation to data-rich documents. However, few have explored using automatically generated word-scale visualizations to enhance the document-centric reading process. As an exploratory step, we propose GistVis, an automatic pipeline that extracts and visualizes data insight from text descriptions. GistVis decomposes the generation process into four modules: Discoverer, Annotator, Extractor, and Visualizer, with the first three modules utilizing the capabilities of large language models and the fourth using visualization design knowledge. Technical evaluation including a comparative study on Discoverer and an ablation study on Annotator reveals decent performance of GistVis. Meanwhile, the user study (N=12) showed that GistVis could generate satisfactory word-scale visualizations, indicating its effectiveness in facilitating users' understanding of data-rich documents (+5.6% accuracy) while significantly reducing their mental demand (p=0.016) and perceived effort (p=0.033).",
     ]
 
     # Batch size for documents
@@ -84,49 +84,8 @@ if __name__ == '__main__':
         relevance = torch.cat(all_relevance_scores,
                               dim=0).numpy().astype(np.float32)
 
-        # Initialize Circular SOM for the current query
-        som = CircularSOM(
-            step=8,                       # Number of neurons in the first layer
-            layer=21,                     # Number of layers in the circular grid
-            input_len=doc_embed.shape[1],  # Input dimensionality
-            sigma=1.5,                    # Initial neighborhood size
-            learning_rate=0.7,            # Initial learning rate
-            activation_distance='euclidean',
-            topology='circular',
-            neighborhood_function='gaussian',
-            random_seed=10
-        )
-
-        # Train the SOM for the current query
-        som.train(
-            data=doc_embed,
-            relevance_score=relevance,
-            num_iteration=1000,  # Adjust as needed
-            w_s=0.8,          # Weight for similarity
-            w_r=0.2,          # Weight for relevance
-            verbose=True,
-            report_error=True,
-            use_sorted=True
-        )
-
-        # Get grid positions after training for the current query
-        ids_same_order = np.arange(doc_embed.shape[0]).tolist()
-        data_grid_positions = get_grid_position_som(
-            som, doc_embed, relevance, ids_same_order)
-
-        # save as json
-        with open(f"./data/layout/{query[i]}.json", "w") as f:
-            json.dump(data_grid_positions, f, indent=2)
-
-        # # kmeans with elbow
-        # kmeans = KMeans(n_clusters=7, random_state=42).fit(doc_embed)
-        # # pred each input's label
-        # labels = kmeans.predict(doc_embed)
-        # # save id with labels
-        # with open(f"./data/layout/{query[i]}_kmeans.json", "w") as f:
-        #     json.dump(labels.tolist(), f, indent=2)
-
         som, df, df_list = generate_rr_projection(doc_embed, relevance, data)
+        # print(df_list)
         # save as json
         with open(f"./data/rr.json", "w") as f:
             json.dump(df_list, f, indent=2)

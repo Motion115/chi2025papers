@@ -478,7 +478,8 @@ def generate_rr_projection(data, relevance, metadata, num_of_epochs=1, w_s=0.2, 
     df["category_num"] = kmeans.labels_
 
     # df to list again
-    df_list = df.to_dict('records')
+    # do not include embeddings
+    df_list = df.drop(columns=['embedding']).to_dict('records')
 
     return som, df, df_list
 
