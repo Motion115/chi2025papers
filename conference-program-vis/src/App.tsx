@@ -1,20 +1,29 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import CircularSOM from './components/CircularSOM'
-import CircularSOM2 from './components/CircularSOM2'
+import React from "react";
+import { ConfigProvider, Layout, Typography } from "antd";
+import Dashboard from "./Dashboard";
+import THEME from "./style/theme";
 
-function App() {
+const { Header, Content, Footer } = Layout;
+const { Text, Title } = Typography;
 
+const App: React.FC = () => {
   return (
     <>
-      <div>
-        {/* <CircularSOM /> */}
-        <CircularSOM2 />
-      </div>
+      <ConfigProvider theme={THEME}>
+        <div>
+          <Header>
+            <Title level={1}>CHI 2025 Papers Explorer</Title>
+          </Header>
+          <Content>
+            <Dashboard />
+          </Content>
+          <Footer>
+            <Text type="secondary">© Ruishi (Ray) Zou 2025</Text>
+          </Footer>
+        </div>
+      </ConfigProvider>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

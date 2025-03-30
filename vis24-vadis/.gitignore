@@ -5,3 +5,5 @@ data/
 scibert-weights/
 **__pycache__
 dynamic_document_embedding/
+
+*.json
