@@ -20,7 +20,7 @@ async function loadMsgPackData<T = ContentSpec[]>(
 
     const arrayBuffer = await response.arrayBuffer();
     const decodedData = decode(arrayBuffer) as T;
-    console.log(fileName, decodedData);
+    // console.log(fileName, decodedData);
     setGlobalState(decodedData);
   } catch (err) {
     console.error("MessagePack loading error:", err);
@@ -32,14 +32,17 @@ async function loadMsgPackData<T = ContentSpec[]>(
 const Dashboard: React.FC = () => {
   const { contentLookup, setContentLookup } = useContentLookup();
   const { authorLookup, setAuthorLookup } = useAuthorLookup();
-  const { relationshipLookup, setRelationshipLookup } = useRelationshipLookup();
+  const { relationshipLookup, setRelationshipLookup, appendRelationshipLookup } = useRelationshipLookup();
 
   const [searchId, setSearchId] = useState<string>("188659");
 
   useEffect(() => {
     loadMsgPackData("/content_lookup.msgpack", setContentLookup);
     loadMsgPackData("/people_lookup.msgpack", setAuthorLookup);
-    loadMsgPackData("/content.msgpack", setRelationshipLookup);
+    [0, 1, 2, 3].forEach((i) =>
+      loadMsgPackData(`/content_${i}.msgpack`, appendRelationshipLookup)
+    );
+    // loadMsgPackData("/content.msgpack", setRelationshipLookup);
   }, []);
 
   return (

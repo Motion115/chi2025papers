@@ -26,10 +26,17 @@ export const useAuthorLookup = create<AuthorLookupState>((set) => ({
 interface RelationshipLookupState {
   relationshipLookup: SomSpec[] | null;
   setRelationshipLookup: (relationshipLookup: SomSpec[]) => void;
+  appendRelationshipLookup: (relationshipLookup: SomSpec[]) => void;
 }
 
 export const useRelationshipLookup = create<RelationshipLookupState>((set) => ({
   relationshipLookup: null,
   setRelationshipLookup: (relationshipLookup: SomSpec[]) =>
     set({ relationshipLookup }),
-}))
+  appendRelationshipLookup: (newItems: SomSpec[]) =>
+    set((state) => ({
+      relationshipLookup: state.relationshipLookup
+        ? [...state.relationshipLookup, ...newItems]
+        : newItems,
+    })),
+}));
