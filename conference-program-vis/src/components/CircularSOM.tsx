@@ -1,20 +1,33 @@
 import * as d3 from "d3";
-import { Slider, Tooltip, Typography } from "antd";
+import { Alert, Flex, Skeleton, Slider, Spin, Tooltip, Typography } from "antd";
 import { useEffect, useRef, useState } from "react";
-import { ContentLookupSpec, RelationshipSpec, SomSpec } from "../types";
+import {
+  LoadingOutlined,
+  ZoomInOutlined,
+  ZoomOutOutlined,
+} from "@ant-design/icons";
+import {
+  CircularSOMProps,
+  ContentLookupSpec,
+  RelationshipSpec,
+  SomSpec,
+} from "../types";
+
+const { Paragraph, Text } = Typography;
 
 interface CircularSOMSpec extends RelationshipSpec {
   circle_dist: number;
 }
 
-interface CircularSOMProps {
-  data: SomSpec;
-  contentLookup: ContentLookupSpec
-}
-
-const CircularSOM: React.FC<CircularSOMProps> = ({ data, contentLookup }) => {
-  const [coordinateData, setCoordinateData] =
-    useState<RelationshipSpec[]>(data.relationship);
+const CircularSOM: React.FC<CircularSOMProps> = ({
+  data,
+  contentLookup,
+  searchId,
+  setClicked,
+}) => {
+  const [coordinateData, setCoordinateData] = useState<RelationshipSpec[]>(
+    data.relationship
+  );
 
   const [topK, setTopK] = useState<number>(100);
 
@@ -24,6 +37,7 @@ const CircularSOM: React.FC<CircularSOMProps> = ({ data, contentLookup }) => {
 
   const svgRef = useRef<SVGSVGElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
+  const infoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let sortedData: CircularSOMSpec[] = data.relationship
@@ -37,14 +51,21 @@ const CircularSOM: React.FC<CircularSOMProps> = ({ data, contentLookup }) => {
 
   useEffect(() => {
     const updateWidth = () => {
-      if (parentRef.current) {
-        setDisplayPortDim(parentRef.current.getBoundingClientRect().width);
+      if (parentRef.current && infoRef.current) {
+        const usableHeight = parentRef.current.getBoundingClientRect().height - infoRef.current.getBoundingClientRect().height;
+        const usableWidth = parentRef.current.getBoundingClientRect().width;
+        const minDim = Math.min(usableHeight, usableWidth);
+        setDisplayPortDim(minDim);
       }
     };
     updateWidth();
     window.addEventListener("resize", updateWidth);
     return () => window.removeEventListener("resize", updateWidth);
   }, []);
+
+  useEffect(() => {
+    setTopK(100)
+  }, [searchId])
 
   useEffect(() => {
     if (!svgRef.current || coordinateData.length === 0) return;
@@ -86,10 +107,9 @@ const CircularSOM: React.FC<CircularSOMProps> = ({ data, contentLookup }) => {
       .style("transform-origin", function (d) {
         return `${xScale(d.circularPos[0])}px ${yScale(d.circularPos[1])}px`;
       })
-      // .on("click", (_, d) => {
-      //   setTitle(d.metadata.title);
-      //   setAbstract(d.metadata.abstract);
-      // })
+      .on("click", (_, d) => {
+        setClicked(d.id.toString());
+      })
       .on("mouseover", function (event: MouseEvent, d: RelationshipSpec) {
         d3.select(".tooltip").remove();
         // Scale effect
@@ -112,9 +132,7 @@ const CircularSOM: React.FC<CircularSOMProps> = ({ data, contentLookup }) => {
           .style("pointer-events", "none")
           .style("z-index", "10")
           .style("display", "none")
-          .html(
-            contentLookup[d.id].title
-          );
+          .html(contentLookup[d.id].title);
 
         // Get SVG dimensions
         const svgNode = svgRef.current;
@@ -190,22 +208,50 @@ const CircularSOM: React.FC<CircularSOMProps> = ({ data, contentLookup }) => {
   };
 
   return (
-    <div ref={parentRef}>
-      <Slider
-        min={0}
-        max={coordinateData.length}
-        value={topK}
-        step={50}
-        onChange={handleSearchSpaceChange}
-      />
-
-      <svg
-        ref={svgRef}
-        width={displayPortDim}
-        height={displayPortDim}
-        style={{ width: "100%", height: displayPortDim }}
-      />
-    </div>
+    <>
+      {data.relationship.length > 0 ? (
+        <div ref={parentRef} style={{ height: "100%" }}>
+          <div ref={infoRef}>
+            <Flex justify="space-between">
+              <ZoomInOutlined />
+              <Slider
+                min={0}
+                max={coordinateData.length}
+                value={topK}
+                step={50}
+                onChange={handleSearchSpaceChange}
+                style={{ width: "90%" }}
+              />
+              <ZoomOutOutlined />
+            </Flex>
+            <Text type="secondary">
+              Drag the slider to zoom in or out. Tooltip number shows how many
+              paper is visualized in the panel. Click on the circles to view detailed information about the "relevant" paper.
+            </Text>
+          </div>
+          <svg ref={svgRef} width={displayPortDim} height={displayPortDim} />
+        </div>
+      ) : (
+        <div>
+          <Spin
+            tip={
+              <>
+                <Paragraph>Loading SOM projection...</Paragraph>
+                <Paragraph>
+                  SOM projection only exsist on Papers, Journals, LBW, Student
+                  Research Competition, alt.CHI and Case Studies
+                </Paragraph>
+              </>
+            }
+          >
+            <Skeleton.Node
+              active
+              style={{ width: displayPortDim, height: displayPortDim }}
+            />
+          </Spin>
+        </div>
+      )}
+    </>
   );
 };
 

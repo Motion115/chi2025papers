@@ -16,11 +16,17 @@ export interface ContentSpec {
   trackId: number;
   typeId: number;
   abstract: string;
-  authors: number[];
+  authors: ShortAuthorsSpec[];
   award: string;
+  shardId: number;
 }
 
-export type ContentLookupSpec = Record<string, ContentSpec>
+export interface ShortAuthorsSpec {
+  personId: number;
+  affiliations: AffiliationSpec[];
+}
+
+export type ContentLookupSpec = Record<string, ContentSpec>;
 
 export interface AuthorSpec {
   id: number;
@@ -29,6 +35,7 @@ export interface AuthorSpec {
   lastName: string;
   middleInitial: string;
   affiliations: AffiliationSpec[];
+  prevalence: number;
 }
 
 export interface AffiliationSpec {
@@ -37,4 +44,23 @@ export interface AffiliationSpec {
   geoLoc: string;
 }
 
-export type AuthorLookupSpec = Record<string, AuthorSpec>
+export type AuthorLookupSpec = Record<string, AuthorSpec>;
+
+export interface EmbeddingSpec {
+  id: number;
+  tsne: number[];
+  umap: number[];
+  category: number;
+}
+
+export interface CircularSOMProps {
+  data: SomSpec;
+  contentLookup: ContentLookupSpec;
+  searchId: string;
+  setClicked: React.Dispatch<React.SetStateAction<string>>;
+}
+
+export interface DimReductionProps {
+  data: EmbeddingSpec[];
+  contentLookup: ContentLookupSpec;
+}

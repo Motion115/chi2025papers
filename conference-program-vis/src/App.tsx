@@ -2,6 +2,7 @@ import React from "react";
 import { ConfigProvider, Layout, Typography } from "antd";
 import Dashboard from "./Dashboard";
 import THEME from "./style/theme";
+import { CSSBasicPageConfig, CSSPageConfig } from "./style/styleConfigs";
 
 const { Header, Content, Footer } = Layout;
 const { Text, Title } = Typography;
@@ -11,13 +12,13 @@ const App: React.FC = () => {
     <>
       <ConfigProvider theme={THEME}>
         <div>
-          <Header>
+          <Header style={CSSBasicPageConfig}>
             <Title level={1}>CHI 2025 Papers Explorer</Title>
           </Header>
           <Content>
             <Dashboard />
           </Content>
-          <Footer>
+          <Footer style={CSSBasicPageConfig}>
             <Text type="secondary">© Ruishi (Ray) Zou 2025</Text>
           </Footer>
         </div>

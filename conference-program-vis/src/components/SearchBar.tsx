@@ -1,7 +1,6 @@
 import { Select } from "antd";
 import { ContentLookupSpec } from "../types";
 
-
 interface SearchBarProps {
   data: ContentLookupSpec;
   defaultSearch: string;
@@ -13,30 +12,21 @@ interface SelectOption {
   label: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ data, defaultSearch, setSearchId }) => {
-  // Properly format the options array
-  const searchList: SelectOption[] = Object.values(data).map((content) => ({
-    value: content.title,
-    label: content.title,
-  }));
+const SearchBar: React.FC<SearchBarProps> = ({
+  data,
+  defaultSearch,
+  setSearchId,
+}) => {
+  const searchList: SelectOption[] = Object.entries(data).map(
+    ([id, content]) => ({
+      value: id,
+      label: content.title,
+    })
+  );
 
   const onChange = (value: string) => {
+    setSearchId(value);
     console.log(`selected ${value}`);
-    // Find the corresponding content by title
-    const selectedContent = Object.values(data).find(
-      (content) => content.title === value
-    );
-    if (selectedContent) {
-      // Assuming you want to set the ID of the selected content
-      // You'll need to modify this if your data structure is different
-      const contentId = Object.keys(data).find(
-        (key) => data[key].title === value
-      );
-      console.log(contentId);
-      if (contentId) {
-        setSearchId(contentId);
-      }
-    }
   };
 
   // const onSearch = (value: string) => {
@@ -53,7 +43,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ data, defaultSearch, setSearchId 
       filterOption={(input, option) =>
         (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
       }
-      style={{ width: "100%" }}
+      style={{ width: "100%", height: "3rem" }}
       options={searchList}
       defaultValue={defaultSearch}
     />

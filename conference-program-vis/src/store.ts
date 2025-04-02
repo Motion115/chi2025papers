@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { AuthorLookupSpec, ContentLookupSpec, SomSpec } from './types'
+import { AuthorLookupSpec, ContentLookupSpec, EmbeddingSpec, SomSpec } from './types'
 
 interface ContentLookupState {
   contentLookup: ContentLookupSpec | null;
@@ -40,3 +40,13 @@ export const useRelationshipLookup = create<RelationshipLookupState>((set) => ({
         : newItems,
     })),
 }));
+
+interface EmbeddingState {
+  embedding: EmbeddingSpec[] | null;
+  setEmbedding: (embedding: EmbeddingSpec[]) => void;
+}
+
+export const useEmbedding = create<EmbeddingState>((set) => ({
+  embedding: null,
+  setEmbedding: (embedding: EmbeddingSpec[]) => set({ embedding }),
+}))
