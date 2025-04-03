@@ -1,9 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { AuthorLookupSpec, AuthorSpec, ContentLookupSpec, ShortAuthorsSpec } from "../types";
+import {
+  AuthorLookupSpec,
+  AuthorSpec,
+  ContentLookupSpec,
+  ShortAuthorsSpec,
+} from "../types";
 import { searchArxiv } from "../utils/arXivSearch";
-import AuthorsVis from "./Authors"
-import { Button, Layout, Tooltip, Typography } from "antd";
-import { ExclamationCircleOutlined, PaperClipOutlined, SearchOutlined } from "@ant-design/icons";
+import AuthorsVis from "./Authors";
+import { Button, Flex, Layout, Space, Tag, Tooltip, Typography } from "antd";
+import {
+  CalendarOutlined,
+  ExclamationCircleOutlined,
+  PaperClipOutlined,
+  SearchOutlined,
+  TrophyOutlined,
+} from "@ant-design/icons";
+import { PaperTypeColorMap, PaperTypeMap } from "../utils/consts";
 
 const { Title, Paragraph, Text, Link } = Typography;
 
@@ -13,86 +25,140 @@ export interface PaperVisProps {
   authorLookup: AuthorLookupSpec;
 }
 
-export type ArXivStatusType = "didn't search" | "not found" | "found" | "searching"
+export type ArXivStatusType =
+  | "didn't search"
+  | "not found"
+  | "found"
+  | "searching";
 
-const PaperContent: React.FC<PaperVisProps> = ({ paperId, contentLookup, authorLookup }) => {
+const PaperContent: React.FC<PaperVisProps> = ({
+  paperId,
+  contentLookup,
+  authorLookup,
+}) => {
   const title = contentLookup[paperId].title;
-  const authors: AuthorSpec[] = contentLookup[paperId].authors.map((d: ShortAuthorsSpec) => {
-    return authorLookup[d.personId]
-  })
-  console.log(authors)
+  const authors: AuthorSpec[] = contentLookup[paperId].authors.map(
+    (d: ShortAuthorsSpec) => {
+      return authorLookup[d.personId];
+    }
+  );
 
-  const [arXivStatus, setArXivStatus] = useState("")
-  const [arXivInfo, setArXivInfo] = useState<string>("")
+  const [arXivStatus, setArXivStatus] = useState("");
+  const [arXivInfo, setArXivInfo] = useState<{
+    title: string;
+    link: string;
+  }>({
+    title: "",
+    link: "",
+  });
+
+  const paperType = PaperTypeMap[contentLookup[paperId].trackId];
+  const paperTypeColor = PaperTypeColorMap[contentLookup[paperId].trackId];
+
+  const paperAward =
+    contentLookup[paperId].award === "BEST_PAPER"
+      ? "Best Paper"
+      : contentLookup[paperId].award === "HONORABLE_MENTION"
+      ? "Honorable Mention"
+      : "";
+  const paperAwardColor = paperAward === "Best Paper" ? "gold" : "orange";
 
   useEffect(() => {
-    setArXivStatus("")
-  }, [paperId])
+    setArXivStatus("");
+  }, [paperId]);
 
   const findArXiv = () => {
-    setArXivStatus("searching")
+    setArXivStatus("searching");
     searchArxiv(`${title}`).then((response) => {
       if (response.entries.length === 0) {
-        setArXivStatus("not found")
+        setArXivStatus("not found");
+      } else {
+        setArXivStatus("found");
+        setArXivInfo({
+          title: response.entries[0].title,
+          link: response.entries[0].link,
+        });
       }
-      else {
-        setArXivStatus("found")
-        setArXivInfo(response.entries[0].link
-        );
-      }
-    })
-  }
+    });
+  };
 
   const openArXivPage = () => {
-    window.open(arXivInfo, "_blank")
-  }
+    window.open(arXivInfo.link, "_blank");
+  };
 
   const ArXivButton = () => {
     if (arXivStatus === "searching") {
-      return <Button loading>Searching ArXiv...</Button>
-    }
-    else if (arXivStatus === "not found") {
       return (
-        <Button disabled>
+        <Button loading size="small">
+          Searching ArXiv...
+        </Button>
+      );
+    } else if (arXivStatus === "not found") {
+      return (
+        <Button disabled size="small">
           <ExclamationCircleOutlined />
           Preprint not found on ArXiv
         </Button>
       );
-    }
-    else if (arXivStatus === "found") {
+    } else if (arXivStatus === "found") {
       return (
-        <Tooltip title="The retrieved preprint may not be correct due to limitation in search term length of ArXiv API">
-          <Button onClick={openArXivPage}>
+        <Tooltip
+          color="#001D70"
+          title={
+            <Paragraph style={{ color: "white" }}>
+              The retrieved preprint may not be correct due to limitation in
+              search term length of ArXiv API. The retrived paper title is{" "}
+              <i>{arXivInfo.title}</i>
+            </Paragraph>
+          }
+        >
+          <Button onClick={openArXivPage} size="small">
             <PaperClipOutlined />
             Open ArXiv Preprint
           </Button>
         </Tooltip>
       );
-    }
-    else {
+    } else {
       return (
-        <Button onClick={findArXiv}>
+        <Button onClick={findArXiv} size="small">
           <SearchOutlined />
           Find ArXiv Preprint
         </Button>
       );
     }
-  }
+  };
+
+  const handlePlan = () => {
+    const url = `https://programs.sigchi.org/chi/2025/program/content/${paperId}`;
+    window.open(url, "_blank");
+  };
 
   return (
-    <Layout>
-      <Text style={{ fontSize: 20, fontWeight: "bold"}}>{title}</Text>
-      <ArXivButton />
+    <Space direction="vertical" style={{width: "100%"}}>
+      <Text style={{ fontSize: 20, fontWeight: "bold" }}>{title}</Text>
+      <Flex gap="small" wrap>
+        <Tag color={paperTypeColor}>{paperType}</Tag>
+        {paperAward !== "" && (
+          <Tag color={paperAwardColor}>
+            <TrophyOutlined /> {paperAward}
+          </Tag>
+        )}
+        <Button size="small" onClick={handlePlan}>
+          <CalendarOutlined /> Plan in Programs
+        </Button>
+        <ArXivButton />
+      </Flex>
+
       {/* <Text type="secondary">
         * The bar chart shows how many papers the author produced in CHI'25.
       </Text> */}
       <AuthorsVis authorList={authors} />
 
-      <Paragraph>
+      <Paragraph style={{ textAlign: "justify"}}>
         <Text strong>Abstract:</Text> {contentLookup[paperId].abstract}
       </Paragraph>
-    </Layout>
+    </Space>
   );
-}
+};
 
-export default PaperContent
+export default PaperContent;

@@ -108,32 +108,30 @@ const Dashboard: React.FC = () => {
             <DimReduction data={embedding} contentLookup={contentLookup} />
           </div>
         )} */}
-      <Text type="secondary">
+      <Text>
         <ul>
           <li>
             <b>Panels</b>: The leftmost panel is the{" "}
             <Link href="https://github.com/RyanQ96/VADIS" target="_blank">
               <b>Circular SOM visualization</b>
             </Link>{" "}
-            (adapted from VADIS, best paper of VIS'24) with the{" "}
-            <b>seed paper</b> you selected, with details of the seed paper
-            displayed on the <b>seed paper card</b> adjacent to the Circular SOM
-            visualization. The rightmost panel (hidden by default) is the{" "}
+            (Circular Self-Organizing Map) with the <b>seed paper</b> you
+            selected, with details of the seed paper displayed on the{" "}
+            <b>seed paper card</b> adjacent to the Circular SOM visualization.
+            The rightmost panel (hidden by default) is the{" "}
             <b>relevant paper card</b>, which can be triggered from clicking the
             dots on Circular SOM. Within the two paper cards, the in situ author
             visualization is powered by{" "}
             <Link href="https://github.com/motion115/GistVis/" target="_blank">
-              <b>GistVis</b>
-            </Link>{" "}
-            (repurposed from the visualizer module of our honorable mention
-            paper at CHI'25).
+              <b>GistVis (@gistvis/wsv)</b>
+            </Link>
+            .
           </li>
           <li>
             <b>Reading Circular SOM</b>: The "relavance" of paper decay on the
             radius, which is also double encoded by the opacity of each dot.
             Similar papers are visualized in proximity with each other, with the
-            colors indicating a potential cluster (default 8 clusters for visual
-            separatability).
+            colors indicating a potential cluster (8 clusters from k-Means).
           </li>
           <li>
             <b>Reading Author Visualization</b>: The bar chart shows how many
@@ -142,7 +140,7 @@ const Dashboard: React.FC = () => {
             authors or the bar chart interactively observe the author's record.
           </li>
           <li>
-            <b>Control</b>: Use the <b>drop down</b> to search and select seed
+            <b>Controls</b>: Use the <b>drop down</b> to search and select seed
             paper. After selecting seed paper, the Circular SOM is dynamically
             loaded, with the center representing the seed paper. Drag the{" "}
             <b>slider</b> to zoom in or out. <b>Tooltip on the slider</b> shows
@@ -174,7 +172,7 @@ const Dashboard: React.FC = () => {
               searchId={searchId}
             />
           </div>
-          <div style={{ width: "40%", overflow: "scroll", height: "60vh" }}>
+          <div style={{ width: "40%", overflowY: "scroll", height: "60vh" }}>
             <Card title="Seed Paper" style={{ height: "100%" }}>
               <PaperContent
                 paperId={searchId}
@@ -184,7 +182,7 @@ const Dashboard: React.FC = () => {
             </Card>
           </div>
 
-          <div style={{ width: "40%", overflow: "scroll", height: "60vh" }}>
+          <div style={{ width: "40%", overflowY: "scroll", height: "60vh" }}>
             <Card title="Relevant Paper" style={{ height: "100%" }}>
               {selectedId !== "" ? (
                 <PaperContent
@@ -208,8 +206,26 @@ const Dashboard: React.FC = () => {
 
   const ScatterView = (
     <>
-      <Text type="secondary">
-        <ul></ul>
+      <Text>
+        <ul>
+          <li>
+            <b>Panels</b>: The left panel is a <b>scatter plot</b> that projects
+            the embedding from SentenceBERT using title + abstract information.
+            The right panel is the <b>paper card</b> where you can view detailed
+            information about the paper.
+          </li>
+          <li>
+            <b>Reading Scatter Plot</b>: Similar papers are visualized in
+            proximity with each other, with the colors indicating a potential
+            cluster (8 clusters from k-Means).
+          </li>
+          <li>
+            <b>Controls</b>: <b>Hover</b> on each dot to see the paper title,
+            and <b>click</b> to load detailed information on <b>paper card</b>.
+            You can also explore two difference dimensionality reduction
+            algorithm: <b>UMAP</b> and <b>t-SNE</b>.
+          </li>
+        </ul>
       </Text>
       <Flex gap="large">
         {embedding && contentLookup && (
@@ -221,7 +237,7 @@ const Dashboard: React.FC = () => {
             />
           </div>
         )}
-        <div style={{ width: "40%", overflow: "scroll", height: "60vh" }}>
+        <div style={{ width: "40%", overflowY: "scroll", height: "60vh" }}>
           <Card title="Selected Paper" style={{ height: "100%" }}>
             {relationshipLookup &&
             contentLookup &&

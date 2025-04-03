@@ -4,7 +4,7 @@ const THEME = {
   token: {
     // colorPrimary: "#B3E5FC",
     // colorPrimary: 'rgb(200, 200, 200)',
-    colorBgLayout: '#ffffff',
+    colorBgLayout: "#ffffff",
     borderRadius: 6,
     fontSize: 16,
     lineHeight: 1.35,
@@ -13,10 +13,10 @@ const THEME = {
   },
   components: {
     Layout: {
-      headerBg: '#ffffff',
-      headerPadding: 0,
-      headerHeight: 60,
-      footerPadding: '50px 0px 50px 0px',
+      headerBg: "#ffffff",
+      headerPadding: "50px 0px 50px 0px",
+      headerHeight: 35,
+      footerPadding: "50px 0px 50px 0px",
     },
     Menu: {
       itemBorderRadius: 12,
@@ -34,9 +34,9 @@ const THEME = {
       // dotActiveBorderColor: '#000000',
     },
     Typography: {
-      titleMarginBottom: '0.3em',
-      titleMarginTop: '0.6em',
-    }
+      titleMarginBottom: "0.3em",
+      titleMarginTop: "0.6em",
+    },
   },
 };
 

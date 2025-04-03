@@ -2,13 +2,7 @@
 export interface ArxivEntry {
   id: string;
   title: string;
-  summary: string;
   authors: string[];
-  published: Date;
-  updated: Date;
-  doi?: string;
-  comment?: string;
-  categories: string[];
   link: string;
 }
 
@@ -44,30 +38,14 @@ export async function searchArxiv(query: string): Promise<ArxivResponse> {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlText, "text/xml");
 
-    // Parse the XML response
     const entries = Array.from(xmlDoc.querySelectorAll("entry")).map(
       (entry) => {
-        const categories = Array.from(entry.querySelectorAll("category")).map(
-          (cat) => cat.getAttribute("term") || ""
-        );
-
         return {
           id: entry.querySelector("id")?.textContent || "",
           title: entry.querySelector("title")?.textContent?.trim() || "",
-          summary: entry.querySelector("summary")?.textContent?.trim() || "",
           authors: Array.from(entry.querySelectorAll("author name")).map(
             (author) => author.textContent || ""
           ),
-          published: new Date(
-            entry.querySelector("published")?.textContent || Date.now()
-          ),
-          updated: new Date(
-            entry.querySelector("updated")?.textContent || Date.now()
-          ),
-          doi: entry.querySelector("arxiv\\:doi")?.textContent || undefined,
-          comment:
-            entry.querySelector("arxiv\\:comment")?.textContent || undefined,
-          categories: categories.filter(Boolean),
           link:
             entry
               .querySelector("link[rel='alternate'][type='text/html']")
