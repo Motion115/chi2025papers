@@ -12,6 +12,8 @@ import {
   RelationshipSpec,
   SomSpec,
 } from "../types";
+import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 const { Paragraph, Text } = Typography;
 
@@ -46,6 +48,8 @@ const CircularSOM: React.FC<CircularSOMProps> = ({
         circle_dist: Math.sqrt(d.circularPos[0] ** 2 + d.circularPos[1] ** 2),
       }))
       .sort((a, b) => a.circle_dist - b.circle_dist);
+    // remove the paper that is the search query
+    sortedData = sortedData.filter((d) => d.id.toString() !== searchId);
     setCoordinateData(sortedData);
   }, [data]);
 
@@ -119,10 +123,25 @@ const CircularSOM: React.FC<CircularSOMProps> = ({
           .style("transform", "scale(1.1)")
           .style("opacity", 1);
 
+        const tooltipContent = (
+          <>
+              <Text style={{ fontWeight: "bold", display: "block" }}>
+                {contentLookup[d.id].title}
+              </Text>
+            <Text type="secondary">
+              Relevance score: {d.relevance.toFixed(3)}
+            </Text>
+          </>
+        );
+
+        const tooltipNode = document.createElement("div");
+        const root = createRoot(tooltipNode);
+        root.render(tooltipContent);
+
         // Create tooltip
         const tooltip = d3
           .select("body")
-          .append("div")
+          .append(() => tooltipNode)
           .attr("class", "tooltip")
           .style("position", "absolute")
           .style("background", "white")
@@ -132,7 +151,7 @@ const CircularSOM: React.FC<CircularSOMProps> = ({
           .style("pointer-events", "none")
           .style("z-index", "10")
           .style("display", "none")
-          .html(contentLookup[d.id].title);
+          // .html(tooltipContent);
 
         // Get SVG dimensions
         const svgNode = svgRef.current;
@@ -224,10 +243,6 @@ const CircularSOM: React.FC<CircularSOMProps> = ({
               />
               <ZoomOutOutlined />
             </Flex>
-            <Text type="secondary">
-              Drag the slider to zoom in or out. Tooltip number shows how many
-              paper is visualized in the panel. Click on the circles to view detailed information about the "relevant" paper.
-            </Text>
           </div>
           <svg ref={svgRef} width={displayPortDim} height={displayPortDim} />
         </div>

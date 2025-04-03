@@ -63,4 +63,5 @@ export interface CircularSOMProps {
 export interface DimReductionProps {
   data: EmbeddingSpec[];
   contentLookup: ContentLookupSpec;
+  setClicked: React.Dispatch<React.SetStateAction<string>>;
 }

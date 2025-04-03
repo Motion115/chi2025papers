@@ -1,4 +1,8 @@
 """
+This code is a derivative from https://github.com/RyanQ96/VADIS/blob/main/relevance_preserving_map/circular_som.py's implementation.
+"""
+
+"""
 Circular Self-Organizing Map (SOM) Implementation
 
 This module implements a Circular Self-Organizing Map (SOM) algorithm for projecting high-dimensional data onto a 2D circular layout. 
@@ -482,79 +486,3 @@ def generate_rr_projection(data, relevance, metadata, num_of_epochs=1, w_s=0.2, 
     df_list = df.drop(columns=['embedding']).to_dict('records')
 
     return som, df, df_list
-
-
-def plot_som_results(som, data, labels, relevance, sort=False):
-    """
-    Visualizes the SOM results by plotting each data point on the SOM grid.
-    
-    Parameters:
-    - som: The trained CircularSOM object.
-    - data: The input data (e.g., images or feature vectors) to be plotted.
-    - labels: The labels or identifiers of the data points (e.g., numbers 0 to 9 for the MNIST dataset).
-    - relevance: The relevance scores for each data point, which can influence the visualization.
-    - sort: Whether to sort the data points by their relevance scores (default: False).
-    
-    Returns:
-    - data_relevance: List of relevance scores corresponding to the plotted data points.
-    - data_occupied: List of SOM grid positions occupied by the data points based on relevance.
-    """
-    # Initialize the resource map (if using relevance in your SOM)
-    som.initialize_resource_map()
-
-    fig = plt.figure(figsize=(10, 10))
-    ax = fig.add_subplot(111)
-
-    data_relevance = []
-    data_occupied = []
-
-    wmap = {}
-    total_loss = 0
-
-    # Prepare data for plotting
-    # Zip together data, labels (num), and relevance for easy access
-    # Optionally sort the data by relevance scores in descending order
-    modified_data = zip(data, labels, relevance)
-    if sort:
-        modified_data = sorted(zip(data, labels, relevance),
-                               key=lambda t: t[2], reverse=True)
-
-    for idx, (x, label, rel_score) in enumerate(modified_data):
-        # Find the best matching unit (BMU) on the SOM for the data point
-        bmu_index, loss = som.winner(x, rel_score, return_distance=True)
-
-        # Store relevance score and occupied grid position
-        data_relevance.append(rel_score)
-        data_occupied.append(som._weights_radius[bmu_index])
-
-        # Accumulate the quantization loss (if tracking performance)
-        total_loss += loss
-
-        # Get the grid location of the BMU (coordinates on the SOM grid)
-        bmu_location = som._grid[bmu_index]
-
-        # Add the data point's label as text at its grid location
-        plt.text(bmu_location[0] + 0.5, bmu_location[1] + 0.5, str(label),
-                 # Color based on label value
-                 color=plt.cm.rainbow(label / 10.0),
-                 fontdict={'weight': 'bold', 'size': 11})
-
-        # Map the BMU index to the current data point's index
-        wmap[bmu_index] = idx
-
-    grid_x_min, grid_x_max = np.min(som._grid[:, 0]), np.max(som._grid[:, 0])
-    grid_y_min, grid_y_max = np.min(som._grid[:, 1]), np.max(som._grid[:, 1])
-    ax.set_xlim(grid_x_min - 2, grid_x_max + 2)
-    ax.set_ylim(grid_y_min - 2, grid_y_max + 2)
-
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-
-    for spine in ax.spines.values():
-        spine.set_visible(False)
-
-    plt.show()
-
-    return data_relevance, data_occupied

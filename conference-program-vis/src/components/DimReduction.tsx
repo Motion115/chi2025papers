@@ -1,45 +1,54 @@
 import * as d3 from "d3";
-import { Alert, Flex, Skeleton, Slider, Spin, Tooltip, Typography } from "antd";
-import { useEffect, useRef, useState } from "react";
-import { LoadingOutlined } from "@ant-design/icons";
 import {
-  ContentLookupSpec,
+  Radio,
+  RadioChangeEvent,
+  Skeleton,
+  Spin,
+  Tooltip,
+  Typography,
+} from "antd";
+import { useEffect, useRef, useState } from "react";
+import {
   DimReductionProps,
   EmbeddingSpec,
-  RelationshipSpec,
-  SomSpec,
 } from "../types";
+import { createRoot } from "react-dom/client";
 
-const { Paragraph } = Typography;
+const { Paragraph, Text } = Typography;
 
 type DimReductionTechnique = "tsne" | "umap";
 
-const DimReduction: React.FC<DimReductionProps> = ({ data, contentLookup }) => {
+const DimReduction: React.FC<DimReductionProps> = ({
+  data,
+  contentLookup,
+  setClicked,
+}) => {
   const [coordinateData, setCoordinateData] = useState<EmbeddingSpec[]>(data);
-
-  const [mappingTechnique, setMappingTechnique] =
+  const [projectionTechnique, setProjectionTechnique] =
     useState<DimReductionTechnique>("umap");
-
   const [displayPortDim, setDisplayPortDim] = useState<{
     width: number;
     height: number;
   }>({ width: 20, height: 20 });
   const PADDING = 5;
-  const RADIUS = 5;
+  const [RADIUS, setRADIUS] = useState(3);
 
   const svgRef = useRef<SVGSVGElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
+  const infoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!parentRef.current) return;
 
     const updateSize = () => {
-      if (parentRef.current) {
+      if (parentRef.current && infoRef.current) {
         const rect = parentRef.current.getBoundingClientRect();
+        const infoRect = infoRef.current.getBoundingClientRect();
         setDisplayPortDim({
           width: rect.width,
-          height: rect.height,
+          height: rect.height - infoRect.height,
         });
+        setRADIUS(Math.min(rect.width, rect.height) / 120);
       }
     };
 
@@ -61,11 +70,11 @@ const DimReduction: React.FC<DimReductionProps> = ({ data, contentLookup }) => {
     svg.selectAll("*").remove();
 
     // Set up scales
-    const xRange = d3.extent(displayData, (d) => d[mappingTechnique][0]) as [
+    const xRange = d3.extent(displayData, (d) => d[projectionTechnique][0]) as [
       number,
       number
     ];
-    const yRange = d3.extent(displayData, (d) => d[mappingTechnique][1]) as [
+    const yRange = d3.extent(displayData, (d) => d[projectionTechnique][1]) as [
       number,
       number
     ];
@@ -85,20 +94,19 @@ const DimReduction: React.FC<DimReductionProps> = ({ data, contentLookup }) => {
       .data(displayData)
       .enter()
       .append("circle")
-      .attr("cx", (d) => xScale(d[mappingTechnique][0]))
-      .attr("cy", (d) => yScale(d[mappingTechnique][1]))
+      .attr("cx", (d) => xScale(d[projectionTechnique][0]))
+      .attr("cy", (d) => yScale(d[projectionTechnique][1]))
       .attr("r", RADIUS)
       .attr("fill", (d) => colorScale(d.category.toString()))
       .attr("opacity", 0.35)
       .style("transform-origin", function (d) {
         return `${xScale(
-          d[mappingTechnique][0]
-        )}px ${yScale(d[mappingTechnique][1])}px`;
+          d[projectionTechnique][0]
+        )}px ${yScale(d[projectionTechnique][1])}px`;
       })
-      // .on("click", (_, d) => {
-      //   setTitle(d.metadata.title);
-      //   setAbstract(d.metadata.abstract);
-      // })
+      .on("click", (_, d) => {
+        setClicked(d.id.toString());
+      })
       .on("mouseover", function (event: MouseEvent, d: EmbeddingSpec) {
         d3.select(".tooltip").remove();
         // Scale effect
@@ -108,10 +116,22 @@ const DimReduction: React.FC<DimReductionProps> = ({ data, contentLookup }) => {
           .style("transform", "scale(1.1)")
           .style("opacity", 1);
 
+        const tooltipContent = (
+          <>
+            <Text style={{ fontWeight: "bold", display: "block" }}>
+              {contentLookup[d.id].title}
+            </Text>
+          </>
+        );
+
+        const tooltipNode = document.createElement("div");
+        const root = createRoot(tooltipNode);
+        root.render(tooltipContent);
+
         // Create tooltip
         const tooltip = d3
           .select("body")
-          .append("div")
+          .append(() => tooltipNode)
           .attr("class", "tooltip")
           .style("position", "absolute")
           .style("background", "white")
@@ -120,8 +140,8 @@ const DimReduction: React.FC<DimReductionProps> = ({ data, contentLookup }) => {
           .style("border-radius", "4px")
           .style("pointer-events", "none")
           .style("z-index", "10")
-          .style("display", "none")
-          .html(contentLookup[d.id].title);
+          .style("display", "none");
+        // .html(contentLookup[d.id].title);
 
         // Get SVG dimensions
         const svgNode = svgRef.current;
@@ -133,8 +153,8 @@ const DimReduction: React.FC<DimReductionProps> = ({ data, contentLookup }) => {
           const tooltipWidth = 20;
 
           // Calculate circle position in SVG coordinates
-          const circleX = xScale(d[mappingTechnique][0]);
-          const circleY = yScale(d[mappingTechnique][1]);
+          const circleX = xScale(d[projectionTechnique][0]);
+          const circleY = yScale(d[projectionTechnique][1]);
 
           // Convert to page coordinates
           const { x: absoluteX, y: absoluteY } = getAbsolutePosition(
@@ -169,7 +189,7 @@ const DimReduction: React.FC<DimReductionProps> = ({ data, contentLookup }) => {
 
     // default title
     // circles.append("title").text((d) => d.metadata.title);
-  }, [coordinateData, displayPortDim, RADIUS, mappingTechnique]);
+  }, [coordinateData, displayPortDim, RADIUS, projectionTechnique]);
 
   const getAbsolutePosition = (svgRect: DOMRect, x: number, y: number) => {
     const scrollX = window.scrollX || document.documentElement.scrollLeft;
@@ -192,17 +212,32 @@ const DimReduction: React.FC<DimReductionProps> = ({ data, contentLookup }) => {
     };
   };
 
+  const DimReductionOptions = [
+    {
+      value: "tsne" as DimReductionTechnique,
+      label: "TSNE",
+    },
+    {
+      value: "umap" as DimReductionTechnique,
+      label: "UMAP",
+    },
+  ];
+
+  const onChangeProjectionTechnique = (e: RadioChangeEvent) => {
+    setProjectionTechnique(e.target.value as DimReductionTechnique);
+  };
+
   return (
     <>
       {data ? (
-        <div ref={parentRef} style={{ height: "100%"}}>
-          {/* <Slider
-            min={0}
-            max={coordinateData.length}
-            value={topK}
-            step={50}
-            onChange={handleSearchSpaceChange}
-          /> */}
+        <div ref={parentRef} style={{ height: "100%" }}>
+          <div ref={infoRef}>
+            <Radio.Group
+              onChange={onChangeProjectionTechnique}
+              value={projectionTechnique}
+              options={DimReductionOptions}
+            />
+          </div>
           <svg
             ref={svgRef}
             width={displayPortDim.width}

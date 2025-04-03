@@ -1,6 +1,7 @@
 import { paragraphSpec, GistvisVisualizer } from "@gistvis/wsv";
 import { useAuthorLookup } from "../store";
 import { AuthorSpec } from "../types";
+import _ from "lodash";
 
 interface AuthorVisProps {
   authorList: AuthorSpec[];
@@ -19,7 +20,10 @@ const AuthorsVis: React.FC<AuthorVisProps> = ({ authorList }) => {
             insightType: "comparison",
             segmentIdx: 0,
             context: authorList.map((author) => {
-              const affiliation = author.affiliations.map((aff) => aff.institution).join(" / ");
+              const affiliation = _(author.affiliations)
+                .map((aff) => _.trim(aff.institution))
+                .uniq()
+                .join(" / ");
               return author.fullName + " (" + affiliation + ")";
             }).join(", "),
           },
@@ -39,7 +43,11 @@ const AuthorsVis: React.FC<AuthorVisProps> = ({ authorList }) => {
 
   return (
     <div>
-      <GistvisVisualizer datafactSpec={data} />
+      {authorList.length === 1 ? (
+        <p>{authorList[0].fullName}</p>
+      ) : (
+        <GistvisVisualizer datafactSpec={data} />
+      )}
     </div>
   );
 };

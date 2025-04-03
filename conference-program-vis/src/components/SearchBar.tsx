@@ -1,5 +1,7 @@
-import { Select } from "antd";
+import { Flex, Select, Typography } from "antd";
 import { ContentLookupSpec } from "../types";
+
+const { Text } = Typography;
 
 interface SearchBarProps {
   data: ContentLookupSpec;
@@ -34,19 +36,22 @@ const SearchBar: React.FC<SearchBarProps> = ({
   // };
 
   return (
-    <Select
-      showSearch
-      placeholder="Search content"
-      optionFilterProp="label"
-      onChange={onChange}
-      // onSearch={onSearch}
-      filterOption={(input, option) =>
-        (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-      }
-      style={{ width: "100%", height: "3rem" }}
-      options={searchList}
-      defaultValue={defaultSearch}
-    />
+    <Flex>
+      <Text style={{ fontWeight: "bold" }}>Seed paper: </Text>
+      <Select
+        showSearch
+        placeholder="Search content"
+        optionFilterProp="label"
+        onChange={onChange}
+        // onSearch={onSearch}
+        filterOption={(input, option) =>
+          (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+        }
+        style={{ width: "100%", height: "3rem" }}
+        options={searchList}
+        defaultValue={defaultSearch}
+      />
+    </Flex>
   );
 };
 

@@ -4,8 +4,6 @@ import os
 from sklearn.cluster import KMeans
 import torch
 from transformers import AutoTokenizer, AutoModel, BertTokenizerFast
-from model.pam import DynamicDocumentEmbeddingModel
-from relevance_preserving_map.circular_som import CircularSOM, generate_rr_projection, get_grid_position_som, plot_som_results
 import numpy as np
 from tqdm import tqdm
 import torch.nn.functional as F
