@@ -1,17 +1,16 @@
 import * as d3 from "d3";
 import {
+  Flex,
   Radio,
   RadioChangeEvent,
   Skeleton,
   Spin,
+  Switch,
   Tooltip,
   Typography,
 } from "antd";
 import { useEffect, useRef, useState } from "react";
-import {
-  DimReductionProps,
-  EmbeddingSpec,
-} from "../types";
+import { DimReductionProps, EmbeddingSpec } from "../types";
 import { createRoot } from "react-dom/client";
 
 const { Paragraph, Text } = Typography;
@@ -32,6 +31,8 @@ const DimReduction: React.FC<DimReductionProps> = ({
   }>({ width: 20, height: 20 });
   const PADDING = 5;
   const [RADIUS, setRADIUS] = useState(3);
+  
+  const [isAll, setIsAll] = useState(true);
 
   const svgRef = useRef<SVGSVGElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
@@ -98,7 +99,12 @@ const DimReduction: React.FC<DimReductionProps> = ({
       .attr("cy", (d) => yScale(d[projectionTechnique][1]))
       .attr("r", RADIUS)
       .attr("fill", (d) => colorScale(d.category.toString()))
-      .attr("opacity", 0.35)
+      .attr("opacity", (d) => {
+        if (isAll === false) {
+          if (contentLookup[d.id].award !== "") return 0.8;
+          else return 0.1;
+        } else return 0.35;
+      })
       .style("transform-origin", function (d) {
         return `${xScale(
           d[projectionTechnique][0]
@@ -183,13 +189,18 @@ const DimReduction: React.FC<DimReductionProps> = ({
           .transition()
           .duration(200)
           .style("transform", "scale(1)")
-          .style("opacity", 0.35);
+          .style("opacity", () => {
+            if (isAll === false) {
+              if (contentLookup[d.id].award !== "") return 0.8;
+              else return 0.1;
+            } else return 0.35;
+          });
         d3.select(".tooltip").remove();
       });
 
     // default title
     // circles.append("title").text((d) => d.metadata.title);
-  }, [coordinateData, displayPortDim, RADIUS, projectionTechnique]);
+  }, [coordinateData, displayPortDim, RADIUS, projectionTechnique, isAll]);
 
   const getAbsolutePosition = (svgRect: DOMRect, x: number, y: number) => {
     const scrollX = window.scrollX || document.documentElement.scrollLeft;
@@ -227,16 +238,27 @@ const DimReduction: React.FC<DimReductionProps> = ({
     setProjectionTechnique(e.target.value as DimReductionTechnique);
   };
 
+
   return (
     <>
       {data ? (
         <div ref={parentRef} style={{ height: "100%" }}>
           <div ref={infoRef}>
-            <Radio.Group
-              onChange={onChangeProjectionTechnique}
-              value={projectionTechnique}
-              options={DimReductionOptions}
-            />
+            <Flex gap="middle">
+              <Text style={{ fontWeight: "bold" }}>Projection algorithm:</Text>
+              <Radio.Group
+                onChange={onChangeProjectionTechnique}
+                value={projectionTechnique}
+                options={DimReductionOptions}
+              />
+              <Text style={{ fontWeight: "bold" }}>Award Filter:</Text>
+              <Switch
+                checked={!isAll}
+                onChange={(state) => setIsAll(!isAll)}
+                checkedChildren="On"
+                unCheckedChildren="Off"
+              />
+            </Flex>
           </div>
           <svg
             ref={svgRef}

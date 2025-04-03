@@ -223,7 +223,7 @@ const Dashboard: React.FC = () => {
             <b>Controls</b>: <b>Hover</b> on each dot to see the paper title,
             and <b>click</b> to load detailed information on <b>paper card</b>.
             You can also explore two difference dimensionality reduction
-            algorithm: <b>UMAP</b> and <b>t-SNE</b>.
+            algorithm: <b>UMAP</b> and <b>t-SNE</b>. The <b>award switch</b> highlights the best paper / honorable mention winners.
           </li>
         </ul>
       </Text>
