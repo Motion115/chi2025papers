@@ -28,7 +28,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   const onChange = (value: string) => {
     setSearchId(value);
-    console.log(`selected ${value}`);
+    // console.log(`selected ${value}`);
   };
 
   // const onSearch = (value: string) => {
@@ -36,8 +36,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
   // };
 
   return (
-    <Flex>
-      <Text style={{ fontWeight: "bold" }}>Seed paper: </Text>
+    <Flex wrap>
+      <Text style={{ fontWeight: "bold" }}>Anchor paper: </Text>
       <Select
         showSearch
         placeholder="Search content"

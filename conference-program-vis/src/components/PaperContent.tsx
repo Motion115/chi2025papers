@@ -23,6 +23,7 @@ export interface PaperVisProps {
   paperId: string;
   contentLookup: ContentLookupSpec;
   authorLookup: AuthorLookupSpec;
+  trigger: number;
 }
 
 export type ArXivStatusType =
@@ -35,6 +36,7 @@ const PaperContent: React.FC<PaperVisProps> = ({
   paperId,
   contentLookup,
   authorLookup,
+  trigger
 }) => {
   const title = contentLookup[paperId].title;
   const authors: AuthorSpec[] = contentLookup[paperId].authors.map(

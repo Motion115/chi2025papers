@@ -13,7 +13,7 @@ export interface ArxivResponse {
 }
 
 export async function searchArxiv(query: string): Promise<ArxivResponse> {
-  console.log(query);
+  // console.log(query);
   const cleanQuery = query.replace(/[<>"{}|\\^`]/g, "").trim();
   const firstFiveWords = cleanQuery.split(" ").slice(0, 3).join(" ");
   const baseUrl = "https://export.arxiv.org/api/query";

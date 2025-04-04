@@ -58,10 +58,12 @@ export interface CircularSOMProps {
   contentLookup: ContentLookupSpec;
   searchId: string;
   setClicked: React.Dispatch<React.SetStateAction<string>>;
+  trigger: number;
 }
 
 export interface DimReductionProps {
   data: EmbeddingSpec[];
   contentLookup: ContentLookupSpec;
   setClicked: React.Dispatch<React.SetStateAction<string>>;
+  trigger: number;
 }

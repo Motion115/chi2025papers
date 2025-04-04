@@ -8,7 +8,7 @@ interface AuthorVisProps {
 }
 
 const AuthorsVis: React.FC<AuthorVisProps> = ({ authorList }) => {
-  console.log(authorList);
+  // console.log(authorList);
 
   const data: paragraphSpec[] = [
     {

@@ -26,6 +26,7 @@ const CircularSOM: React.FC<CircularSOMProps> = ({
   contentLookup,
   searchId,
   setClicked,
+  trigger
 }) => {
   const [coordinateData, setCoordinateData] = useState<RelationshipSpec[]>(
     data.relationship
@@ -49,7 +50,7 @@ const CircularSOM: React.FC<CircularSOMProps> = ({
       }))
       .sort((a, b) => a.circle_dist - b.circle_dist);
     // remove the paper that is the search query
-    sortedData = sortedData.filter((d) => d.id.toString() !== searchId);
+    // sortedData = sortedData.filter((d) => d.id.toString() !== searchId);
     setCoordinateData(sortedData);
   }, [data]);
 
@@ -65,7 +66,7 @@ const CircularSOM: React.FC<CircularSOMProps> = ({
     updateWidth();
     window.addEventListener("resize", updateWidth);
     return () => window.removeEventListener("resize", updateWidth);
-  }, []);
+  }, [parentRef, infoRef]);
 
   useEffect(() => {
     setTopK(100)
@@ -91,7 +92,7 @@ const CircularSOM: React.FC<CircularSOMProps> = ({
     ];
     const xScale = d3.scaleLinear(xRange, [PADDING, displayPortDim - PADDING]);
     const yScale = d3.scaleLinear(yRange, [displayPortDim - PADDING, PADDING]);
-    const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+    const colorScale = d3.scaleOrdinal(d3.schemeTableau10);
     const relevanceRange = d3.extent(displayData, (d) => {
       if (d.relevance != 1) return d.relevance;
     }) as [number, number];
@@ -106,7 +107,13 @@ const CircularSOM: React.FC<CircularSOMProps> = ({
       .attr("cx", (d) => xScale(d.circularPos[0]))
       .attr("cy", (d) => yScale(d.circularPos[1]))
       .attr("r", RADIUS)
-      .attr("fill", (d) => colorScale(d.category.toString()))
+      .attr("fill", (d) => {
+        if (d.id.toString() === searchId) {
+          return "grey"
+        } else {
+          return colorScale(d.category.toString())
+        }
+      })
       .style("opacity", (d) => opacityScale(d.relevance))
       .style("transform-origin", function (d) {
         return `${xScale(d.circularPos[0])}px ${yScale(d.circularPos[1])}px`;
@@ -261,7 +268,7 @@ const CircularSOM: React.FC<CircularSOMProps> = ({
           >
             <Skeleton.Node
               active
-              style={{ width: displayPortDim, height: displayPortDim }}
+              style={{ width: "100%", height: displayPortDim }}
             />
           </Spin>
         </div>

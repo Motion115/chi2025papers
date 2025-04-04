@@ -21,6 +21,7 @@ const DimReduction: React.FC<DimReductionProps> = ({
   data,
   contentLookup,
   setClicked,
+  trigger
 }) => {
   const [coordinateData, setCoordinateData] = useState<EmbeddingSpec[]>(data);
   const [projectionTechnique, setProjectionTechnique] =
@@ -87,7 +88,7 @@ const DimReduction: React.FC<DimReductionProps> = ({
       displayPortDim.height - PADDING,
       PADDING,
     ]);
-    const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+    const colorScale = d3.scaleOrdinal(d3.schemeTableau10);
 
     // Create circles with combined hover effects
     const circles = svg
@@ -244,7 +245,7 @@ const DimReduction: React.FC<DimReductionProps> = ({
       {data ? (
         <div ref={parentRef} style={{ height: "100%" }}>
           <div ref={infoRef}>
-            <Flex gap="middle">
+            <Flex gap="middle" wrap>
               <Text style={{ fontWeight: "bold" }}>Projection algorithm:</Text>
               <Radio.Group
                 onChange={onChangeProjectionTechnique}
